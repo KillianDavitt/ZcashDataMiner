@@ -2,6 +2,13 @@ import psutil
 import os
 import json
 import subprocess
+from app import db
+from app.models import Transaction
+from tinydb import TinyDB, Query
+
+db = TinyDB('db.json')
+Transaction = Query()
+
 procs = {p.pid: p.info for p in psutil.process_iter(attrs=['name', 'username'])}
 if not 'zcashd' in [p['name'] for p in procs.values()]:
     print("Zcash daemon must be running.....")
@@ -26,9 +33,24 @@ def get_next_block(curr_block):
     next_block = get_block(next_block_hash)
     return next_block
 
+
+def get_raw_tx(tx_id):
+    raw_tx = zcli("getrawtransaction " + tx_id)
+    return raw_tx
+
+
+def decode_raw_tx(tx_blob):
+    raw_tx = zcli("decoderawtransaction " + tx_blob.decode())
+    return json.loads((raw_tx).decode())
+
+
 b = get_block("0") # initial block
 
-for i in range(3000):
+for i in range(30):
     b = get_next_block(b)
-    if len(b['tx']) > 1:
-        print(b['tx'])
+    tx_id = b['tx']
+    tx = get_raw_tx(tx_id[0])
+    tx = decode_raw_tx(tx)
+    db.insert(tx)
+    
+    

@@ -1,0 +1,9 @@
+flask
+flake8
+flask-sqlalchemy
+flask-wtf
+sqlalchemy-migrate
+nose
+uwsgi
+statistics
+psutil
