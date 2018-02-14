@@ -3,10 +3,8 @@ import os
 import json
 import subprocess
 
-from tinydb import TinyDB, Query
-
-db = TinyDB('db.json')
-Transaction = Query()
+from app import db
+from app.models import Transaction, Vin, Vout, VJoinSplit, Script, Nullifier, Commitment, Mac
 
 procs = {p.pid: p.info for p in psutil.process_iter(attrs=['name', 'username'])}
 if not 'zcashd' in [p['name'] for p in procs.values()]:
@@ -67,7 +65,53 @@ def main():
         for tx_id in txs:
             tx = get_raw_tx(tx_id)
             tx = decode_raw_tx(tx)
-            db.insert(tx)
+            t = Transaction(tx_id=tx_id)
+            vins = []
+            vouts = []
+            vjoinsplits = []
+            for out in tx['vout']:
+                
+                o = Vout(transaction_id=tx_id)
+                t.vouts.append(o)
+                db.session.add(o)
+                scr = out['scriptPubKey']
+                s = Script(vout_id=o.vout_id,
+                           transaction_id=tx_id)
+                s.asm = scr['asm']
+                s.hex_script = scr['hex']
+                o.scripts.append(s)
+                s.vout = o
+                db.session.add(s)
+
+            for vin in tx['vin']:
+                v = Vin(transaction_id=tx_id)
+                t.vins.append(v)
+                db.session.add(v)
+            for jsplit in tx['vjoinsplit']:
+                joinsplit = VJoinSplit()
+                t.vjoinsplits.append(joinsplit)
+
+                for null in jsplit['nullifiers']:
+                    n = Nullifier(null=null, js_id=joinsplit.vjoinsplit_id)
+                    joinsplit.nullifiers.append(n)
+                    db.session.add(n)
+                    
+                for comm in jsplit['commitments']:
+                    c = Commitment(commit=comm, js_id=joinsplit.vjoinsplit_id)
+                    joinsplit.commitments.append(c)
+                    db.session.add(c)
+
+                for mac in jsplit['macs']:
+                    m = Mac(ma=mac, js_id=joinsplit.vjoinsplit_id)
+                    joinsplit.macs.append(m)
+                    db.session.add(m)
+                
+                vjoinsplits.append(joinsplit)
+                db.session.add(joinsplit)
+                
+            db.session.add(t)
+
+            db.session.commit()
         if int(curr_block) % 50 ==0:
             print("FINISHED 50 BLOCKS, saving block progress")
             with open('current_block.txt', 'w') as f:
