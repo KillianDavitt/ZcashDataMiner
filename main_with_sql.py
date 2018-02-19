@@ -22,8 +22,11 @@ on and resume in the correct place each time
 
 
 def zcli(cmd):
-    process = subprocess.Popen(("zcash-cli " + cmd).split(), stdout=subprocess.PIPE)
-    output, error = process.communicate()
+    try:
+        process = subprocess.Popen(("zcash-cli " + cmd).split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+    except OSError:
+        print("ERROR: COMMAND TOO LONG, not processing transaction")
     return output
 
 # Gets the block from hash or height
