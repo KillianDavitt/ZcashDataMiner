@@ -28,6 +28,7 @@ def zcli(cmd):
         output, error = process.communicate()
     except OSError:
         print("ERROR: COMMAND TOO LONG, not processing transaction")
+        print(type(output))
     return output
 
 # Gets the block from hash or height
@@ -48,6 +49,8 @@ def get_raw_tx(tx_id):
 
 def decode_raw_tx(tx_blob):
     raw_tx = zcli("decoderawtransaction " + tx_blob.decode())
+    if raw_tx is None:
+        return raw_tx
     return json.loads((raw_tx).decode())
 
 
@@ -68,7 +71,7 @@ def main():
         print( str(len(txs)) + " ,", end='')
         for tx_id in txs:
             tx = get_raw_tx(tx_id)
-            if len(tx)<3 :
+            if tx == None:
                 continue
             tx = decode_raw_tx(tx)
             t = Transaction(tx_id=tx_id)
