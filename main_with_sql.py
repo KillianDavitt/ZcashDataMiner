@@ -2,7 +2,7 @@ import psutil
 import os
 import json
 import subprocess
-
+import sqlalchemy
 from app import db
 from app.models import Transaction, Vin, Vout, VJoinSplit, Script, Nullifier, Commitment, Mac
 
@@ -61,7 +61,7 @@ def main():
         b = get_next_block(b)
         curr_block = str(int(curr_block) +  1)
         txs = b['tx']
-        print("Another block: " + str(len(txs)) + " transactions")
+        print( str(len(txs)) + " ,", end='')
         for tx_id in txs:
             tx = get_raw_tx(tx_id)
             tx = decode_raw_tx(tx)
@@ -72,6 +72,9 @@ def main():
             for out in tx['vout']:
                 
                 o = Vout(transaction_id=tx_id)
+                o.value = out['value']
+                o.value_zat = out['valueZat']
+                o.n = out['n']
                 t.vouts.append(o)
                 db.session.add(o)
                 scr = out['scriptPubKey']
@@ -85,6 +88,12 @@ def main():
 
             for vin in tx['vin']:
                 v = Vin(transaction_id=tx_id)
+                try:
+                    v.coinbase = vin['coinbase']
+                    v.sequence = vin['sequence']
+                except KeyError:
+                    pass
+
                 t.vins.append(v)
                 db.session.add(v)
             for jsplit in tx['vjoinsplit']:
@@ -116,8 +125,11 @@ def main():
                 db.session.add(joinsplit)
                 
             db.session.add(t)
-
-            db.session.commit()
+            try:
+                db.session.commit()
+            except sqlalchemy.exc.IntegrityError:
+                print("Failed to Commit")
+                db.session.rollback()
         if int(curr_block) % 50 ==0:
             print("FINISHED 50 BLOCKS, saving block progress")
             with open('current_block.txt', 'w') as f:
