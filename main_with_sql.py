@@ -68,6 +68,8 @@ def main():
         print( str(len(txs)) + " ,", end='')
         for tx_id in txs:
             tx = get_raw_tx(tx_id)
+            if tx is None:
+                continue
             tx = decode_raw_tx(tx)
             t = Transaction(tx_id=tx_id)
             vins = []
