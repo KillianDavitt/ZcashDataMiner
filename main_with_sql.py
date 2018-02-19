@@ -89,6 +89,12 @@ def main():
                 db.session.add(v)
             for jsplit in tx['vjoinsplit']:
                 joinsplit = VJoinSplit()
+                joinsplit.vpub_old = jsplit['vpub_old']
+                joinsplit.vpub_new = jsplit['vpub_new']
+                joinsplit.anchor = jsplit['anchor']
+                joinsplit.onetime_pub_key = jsplit['onetimePubKey']
+                joinsplit.random_seed = jsplit['randomSeed']
+                joinsplit.proof = jsplit['proof']
                 t.vjoinsplits.append(joinsplit)
 
                 for null in jsplit['nullifiers']:
