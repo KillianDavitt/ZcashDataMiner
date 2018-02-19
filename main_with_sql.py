@@ -22,6 +22,7 @@ on and resume in the correct place each time
 
 
 def zcli(cmd):
+    output = None
     try:
         process = subprocess.Popen(("zcash-cli " + cmd).split(), stdout=subprocess.PIPE)
         output, error = process.communicate()
