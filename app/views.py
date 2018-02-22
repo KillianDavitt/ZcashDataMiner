@@ -1,10 +1,8 @@
 from flask import render_template, redirect, url_for, request, jsonify
-from app import app
-from tinydb import TinyDB, Query
-db = TinyDB('db.json')
-Transaction = Query()
+from app import app, db
+from app.models import Transaction
 
 @app.route('/')
 def index():
-    ts = db.all()    
-    return jsonify(ts)
+    t = Transaction.query.all()
+    return jsonify(t)
