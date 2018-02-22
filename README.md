@@ -34,3 +34,19 @@ Once zcashd is ready you can run the data mining software
 venv/bin/python3 main_with_sql.py
 ```
 
+### Using pre-provided database
+If you are using a premade database
+
+Copy the sqlite3 database file to 
+
+```
+ZcashDataMiner/transactions.sqlite
+```
+
+### Viewing the transaction data
+
+```
+venv/bin/python3 run.py
+```
+
+Open a browser and visit http://127.0.0.1:5000
