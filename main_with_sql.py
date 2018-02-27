@@ -4,7 +4,7 @@ import json
 import subprocess
 import sqlalchemy
 from app import db
-from app.models import Transaction, Vin, Vout, VJoinSplit, Script, Nullifier, Commitment, Mac
+from app.models import Transaction, Vin, Vout, VJoinSplit, Script, VinScript, Nullifier, Commitment, Mac
 
 procs = {p.pid: p.info for p in psutil.process_iter(attrs=['name', 'username'])}
 if not 'zcashd' in [p['name'] for p in procs.values()]:
@@ -18,7 +18,6 @@ transactions then gets the next block, gets all the transactions and
 so on. So, we can save to disk the number of the current block we are
 on and resume in the correct place each time
 '''
-
 
 
 def zcli(cmd):
@@ -97,11 +96,19 @@ def main():
 
             for vin in tx['vin']:
                 v = Vin(transaction_id=tx_id)
-                try:
+                if 'coinbase' in vin:
+                    # Coinbase transaction
                     v.coinbase = vin['coinbase']
                     v.sequence = vin['sequence']
-                except KeyError:
-                    pass
+                else:
+                    # Scripted transaction
+                    s = VinScript(vin_id=v.vin_id,
+                                  transaction_id=tx_id)
+                    scr = vin['scriptSig']
+                    s.asm = scr['asm']
+                    s.hex_script = scr['hex']
+                    v.scripts.append(s)
+                    db.session.add(s)
 
                 t.vins.append(v)
                 db.session.add(v)

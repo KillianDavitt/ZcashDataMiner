@@ -12,6 +12,36 @@ class Vin(db.Model):
     vin_id = db.Column(db.Integer, primary_key=True)
     coinbase = db.Column(db.Integer)
     sequence = db.Column(db.Integer)
+    scripts = db.relationship('VinScript', backref='vin', lazy=True)
+    transaction_id = db.Column(db.Integer, db.ForeignKey('transaction.tx_id'), nullable=False)
+
+    
+class Vout(db.Model):
+    vout_id = db.Column(db.Integer, primary_key=True)
+    n = db.Column(db.Integer)
+    value = db.Column(db.Float)
+    value_zat = db.Column(db.Integer)
+    transaction_id = db.Column(db.Integer, db.ForeignKey('transaction.tx_id'), nullable=False)
+    scripts = db.relationship('Script', backref='vout', lazy=True)
+
+
+class Script(db.Model):
+    script_id = db.Column(db.Integer, primary_key=True)
+    addresses = db.relationship('Address', backref='script', lazy=True)
+    vout_id = db.Column(db.Integer, db.ForeignKey('vout.vout_id'), nullable=False)
+    asm = db.Column(db.String())
+    hex_script = db.Column(db.String())
+    req_sigs = db.Column(db.Integer)
+    type_script = db.Column(db.String)
+    transaction_id = db.Column(db.Integer, db.ForeignKey('transaction.tx_id'), nullable=False)
+
+class VinScript(db.Model):
+    script_id = db.Column(db.Integer, primary_key=True)
+    vin_id = db.Column(db.Integer, db.ForeignKey('vin.vin_id'), nullable=False)
+    asm = db.Column(db.String())
+    hex_script = db.Column(db.String())
+    req_sigs = db.Column(db.Integer)
+    type_script = db.Column(db.String)
     transaction_id = db.Column(db.Integer, db.ForeignKey('transaction.tx_id'), nullable=False)
 
 class VJoinSplit(db.Model):
@@ -47,26 +77,6 @@ class Commitment(db.Model):
                       db.ForeignKey('v_join_split.vjoinsplit_id'),
                       nullable=False)
     
-    
-class Vout(db.Model):
-    vout_id = db.Column(db.Integer, primary_key=True)
-    n = db.Column(db.Integer)
-    value = db.Column(db.Float)
-    value_zat = db.Column(db.Integer)
-    transaction_id = db.Column(db.Integer, db.ForeignKey('transaction.tx_id'), nullable=False)
-    scripts = db.relationship('Script', backref='vout', lazy=True)
-
-
-class Script(db.Model):
-    script_id = db.Column(db.Integer, primary_key=True)
-    addresses = db.relationship('Address', backref='script', lazy=True)
-    vout_id = db.Column(db.Integer, db.ForeignKey('vout.vout_id'), nullable=False)
-    asm = db.Column(db.String())
-    hex_script = db.Column(db.String())
-    req_sigs = db.Column(db.Integer)
-    type_script = db.Column(db.String)
-    transaction_id = db.Column(db.Integer, db.ForeignKey('transaction.tx_id'), nullable=False)
-
     
 class Address(db.Model):
     add = db.Column(db.String(38), primary_key=True)
