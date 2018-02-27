@@ -84,3 +84,8 @@ class Address(db.Model):
 
     transaction_id = db.Column(db.Integer, db.ForeignKey('transaction.tx_id'), nullable=False)
 
+class Signature(db.Model):
+    sig_id = db.Column(db.Integer, primary_key=True)
+    r = db.Column(db.String(80))
+    s = db.Column(db.String(80))
+    tx_id = db.Column(db.String())
