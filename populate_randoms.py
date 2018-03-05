@@ -20,8 +20,8 @@ for i in range(5000000):
     structure_value = s_r[0:2] 
     total_length = s_r[2:4] 
     r_integer=s_r[2:3] 
-    r_length = int(s_r[3:4]) 
-    r = s_r[4:4+r_length]
+    r_length = int(s_r[3:5],16) 
+    r = s_r[5:5+r_length]
     sig = Signature(r=r, tx_id=scr[6])
     db.session.add(sig)
     n = n+1
