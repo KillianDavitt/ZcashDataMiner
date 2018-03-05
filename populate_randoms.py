@@ -17,10 +17,10 @@ for i in range(5000000):
     # Split the script by space
     s_r = scr[2].split(' ')[0]
 
-    structure_value = s_r[0:1] 
-    total_length = s_r[1:2] 
+    structure_value = s_r[0:2] 
+    total_length = s_r[2:4] 
     r_integer=s_r[2:3] 
-    r_length = s_r[3:4] 
+    r_length = int(s_r[3:4]) 
     r = s_r[4:4+r_length]
     sig = Signature(r=r, tx_id=scr[6])
     db.session.add(sig)
