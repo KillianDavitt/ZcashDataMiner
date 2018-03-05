@@ -16,8 +16,13 @@ for i in range(5000000):
 
     # Split the script by space
     s_r = scr[2].split(' ')[0]
-    s = s_r[0:int(len(s_r)/2)]
-    r = s_r[int(len(s_r)/2):]
+
+    structure_value = s_r[0:1] //30
+    total_length = s_r[1:2] //44
+    r_integer=s_r[2:3] //02
+    r_length = s_r[3:4] //20
+    r = s_r[4:4+r_length]
+    s = s_r[4+4+r_length:]
     sig = Signature(r=r, s=s, tx_id=scr[6])
     db.session.add(sig)
     n = n+1
