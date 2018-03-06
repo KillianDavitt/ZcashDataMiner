@@ -10,7 +10,7 @@ with open('progress.txt') as f:
 
 
 # For every vin script
-for i in range(100000):
+for i in range(10000000):
     c.execute('SELECT * FROM "vin_script" WHERE script_id=' + str(n) + ';')
     scr = c.fetchone()
 
@@ -20,10 +20,16 @@ for i in range(100000):
     structure_value = s_r[0:2] 
     total_length = s_r[2:4] 
     r_integer=s_r[4:6]
-    r_length = int(s_r[6:8],16) * 2
-    print("R length is: " + str(r_length))
+    r_length = 0
+    try:
+        r_length = int(s_r[6:8],16) * 2
+    except ValueError:
+        print(scr)
+        n = n+1
+        continue
+    #print("R length is: " + str(r_length))
     r = s_r[8:8+r_length]
-    print("R is: " + str(r))
+    #print("R is: " + str(r))
     sig = Signature(r=r, tx_id=scr[6])
     db.session.add(sig)
     n = n+1
